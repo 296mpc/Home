@@ -11,7 +11,10 @@ const src = '../Input';
 let index = 1;
 var DataLoad = "";
 var artigos = [];
-console.log('Iniciou processamento');
+var artigos1 = [];
+var express = require('express');
+var listarbrowser = express();
+
 runSequentially();
 
 function runSequentially (callback) {	
@@ -20,9 +23,13 @@ function runSequentially (callback) {
       console.log('Acabou processamento dos PDFs');
   
     writedataSQL((err) => {
-      if (err) return callback(err)
-      console.log('Acabou exportação para BD SQL');
-
+    	if (err) return callback(err)
+	  	console.log('Acabou exportacao para BD SQL');
+	
+	  	AnalisedataSQL((err) => {
+      		if (err) return callback(err)
+      		console.log('Acabou Analise para BD SQL');
+    	})
     })
   })
 
@@ -31,6 +38,7 @@ function runSequentially (callback) {
 	
 function processpdffiles (done) {
 	fs.readdir(src, (err, files) => {	 //ler diretório Input PDF's
+	console.log('Iniciou processamento dos PDFs');
 		files.forEach(item => {
 			let name="";
 			let IVA="";
@@ -53,7 +61,7 @@ function processpdffiles (done) {
 				//Extrair informação que pretendemos tratar Produto, valor, quantidade, preço unitário, etc...
 			for (let i = 0 ;i < arrayOfLines.length;++i){
 					if ((['E ', 'C ', 'D '].indexOf(arrayOfLines[i].toString().trim().substring(0,2)) >= 0) && (arrayOfLines[i].toString().trim().substring(6).substring(0,1)!=" ")) {
-						name= arrayOfLines[i].toString().substring(6,arrayOfLines[i].toString().length-9).trim();
+						name= arrayOfLines[i].toString().substring(6,arrayOfLines[i].toString().length-9).trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/['\/#!$%\^&\*;:{}=\-_`~()]/g," "); //Devido ao caracter especiais, retirar todos
 						IVA=arrayOfLines[i].toString().trim().substring(2,5).replace(',','.').trim();
 						qtd=1;
 						valunit=0;
@@ -72,7 +80,7 @@ function processpdffiles (done) {
 							qtd=arrayOfLines[i+1].toString().substring(arrayOfLines[i+1].toString().lastIndexOf("X")-12,arrayOfLines[i+1].toString().lastIndexOf("X")-1).replace(',','.').trim();
 							valunit=arrayOfLines[i+1].toString().substring(arrayOfLines[i+1].toString().lastIndexOf("X")+1,arrayOfLines[i+1].toString().lastIndexOf("X")+10).replace(',','.').trim();
 							Value=arrayOfLines[i+1].toString().trim().substring(arrayOfLines[i+1].toString().trim().lastIndexOf(",")-9).trim().replace(',','.');
-							descr_desconto=arrayOfLines[i+2].toString().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); //Devido ao caracter "ç" normalizar expressão primeiro
+							descr_desconto=arrayOfLines[i+2].toString().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); //Devido ao caracter "ç" normalizar expressão primeiro e retirar todos os caracteres especiais
 							if(descr_desconto.lastIndexOf("Poupanca Imediata") >=0)
 							{
 								desconto=descr_desconto.substring(descr_desconto.length-9).replace('(',' ').replace(')',' ').replace(',','.').trim();
@@ -123,7 +131,7 @@ function writedataSQL (done) {
 	//Conectar ao SQL Server
 	var sql = require("mssql/msnodesqlv8");
 
-	// config for your database
+	// config database
 	var config = {
 		user: 'sa',
 		password: 'olamundo123.',
@@ -131,28 +139,71 @@ function writedataSQL (done) {
 		database: 'Testes' 
 	};
 	
-	// connect to your database
+	// connectar BD
 	sql.connect(config, function (err) {
 
-		if (err) console.log(err);
+		if (err) console.log(err);		
 
 		// create Request object
 		var sqlrequest = new sql.Request();
-		
-		// query to the database and get the records
 
 		console.log("Exportar dados para Base Dados");
-console.log([artigos[1]])
-		var sqlquery = "INSERT INTO PingoDoceInvoice (Date,Product,IVA,Qtd,UnitCost,TotalValue,Discount,UnitCostReal,TotalValueReal) VALUES ?";
 
-		sqlrequest.query(sqlquery, [artigos[1]],function (err, resultado) {
+		//Acrescentar em cada valor da matriz o caracter ' para construir query
+		for(var i=0; i<artigos.length; i++){
+          artigos1.push(artigos[i].map(j => "'" + j + "'").join());
+		}
+		   
+		// query to the database and get the records
+		var sqlquery = "INSERT INTO PingoDoceInvoice (Date,Product,IVA,Qtd,UnitCost,TotalValue,Discount,UnitCostReal,TotalValueReal) VALUES " + artigos1.map(i => '(' + i + ')').join();
+
+		//Executar Query
+		sqlrequest.query(sqlquery,function (err, resultado) {
 			if (err) throw err;
-			console.log("Number of records inserted: " + resultado.rowsAffected);
+			console.log("Numbero de registos inseridos: " + resultado.rowsAffected + " linhas");
+			done()
 		});
-		
+			
+
 	});
-
-	done()
-
 }
+
+function AnalisedataSQL (done) {
+	//Conectar ao SQL Server
+	var sql = require("mssql/msnodesqlv8");
+
+	// config database
+	var config = {
+		user: 'sa',
+		password: 'olamundo123.',
+		server: 'Nuno\\SQLEXPRESS2012', 
+		database: 'Testes' 
+	};
+	
+	// connectar BD
+	sql.connect(config, function (err) {
+
+		if (err) console.log(err);		
+
+		// create Request object
+		var sqlrequest = new sql.Request();
+
+		console.log("Iniciar analise dados da Base Dados");
+
+			
+		// query to the database and get the records
+		var sqlquery2 = "Select * from (select Product,Count(*)as Ncompras, avg(UnitCostReal) as media,max(UnitCostReal)as maximo,min(UnitCostReal)as minimo from PingoDoceInvoice Group by Product)PrecoUnitarioReal where Ncompras>1 and media<>maximo and media<>minimo and maximo<>minimo order by 1";
+ 
+		//Executar Query
+		sqlrequest.query(sqlquery2,function (err, resultado) {
+			if (err) throw err;
+			console.log(resultado.recordset);
+				done()	
+		});
+
+	});
+}
+
+
+
 

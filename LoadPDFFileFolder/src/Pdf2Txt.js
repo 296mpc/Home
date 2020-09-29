@@ -53,7 +53,7 @@ function processpdffiles (done) {
 				//Extrair informação que pretendemos tratar Produto, valor, quantidade, preço unitário, etc...
 			for (let i = 0 ;i < arrayOfLines.length;++i){
 					if ((['E ', 'C ', 'D '].indexOf(arrayOfLines[i].toString().trim().substring(0,2)) >= 0) && (arrayOfLines[i].toString().trim().substring(6).substring(0,1)!=" ")) {
-						name= arrayOfLines[i].toString().substring(6,arrayOfLines[i].toString().length-9).trim();
+						name= arrayOfLines[i].toString().substring(6,arrayOfLines[i].toString().length-9).trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/['\/#!$%\^&\*;:{}=\-_`~()]/g," "); //Devido ao caracter especiais, retirar todos
 						IVA=arrayOfLines[i].toString().trim().substring(2,5).replace(',','.').trim();
 						qtd=1;
 						valunit=0;

@@ -6,10 +6,8 @@ const pdfData2 = require('./Pdf2SQL.js');
 app.get('/', function (req, res) {
   res.send('Processamento de ficheiros PDF da pasta Input');
   //pdfData;
-  pdfData2;
-  console.log('Terminou processamento');
+  pdfData2;  
 });
 
 app.listen(3000, function () {
-  console.log('Listening on port 3000!');
 });
