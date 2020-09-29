@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.3",
+    "msnodesqlv8": "^2.0.5",
+    "mssql": "^6.2.2",
     "pdf-extract": "^1.0.11",
     "pdf2json": "^1.2.0"
   }
