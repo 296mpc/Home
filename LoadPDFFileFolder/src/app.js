@@ -1,12 +1,10 @@
 var express = require('express');
 var app = express();
-//const pdfData = require('./Pdf2Txt.js');
-const pdfData2 = require('./Pdf2SQL.js');
+const pdfData = require('./Module');
 
 app.get('/', function (req, res) {
-  res.send('Processamento de ficheiros PDF da pasta Input');
-  //pdfData;
-  pdfData2;  
+  pdfData;
+  res.send(pdfData.resultadoresposta);
 });
 
 app.listen(3000, function () {
