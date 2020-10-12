@@ -1,0 +1,78 @@
+<html>
+	<head>
+    	<meta charset="utf-8">
+    	<title>Leitura e analise das faturas (PDF's) do Pingo Doce</title>
+  	</head>
+  	<body>
+    	<h1>Leitura e analise das faturas (PDF's) do Pingo Doce</h1>
+		<br>
+		<h3>Documentos existentes na pasta</h3>
+		<br>
+		<table align="Center">
+			<% for(var item in listadocs) { %>
+			<tr><td><%= listadocs[item] %> </td></tr>
+			<% } %>
+		</table>
+		<p id="DeleteFiles_id">
+			Para refrescar lista carregue no botao		
+			<button id="DeleteFiles">Delete!</button>
+		</p>
+				<br>
+		<h3>Resultados da analise dos dados existentes na tabela </h3>
+		<br>
+		<table align="Center" >
+			<tr align="Center">
+				<td>Artigo </td>
+				<td>Qtd. de Compras</td>
+				<td>Media do Custo unitario </td>
+				<td>Maximo do Custo unitario</td>
+				<td>Minimo do Custo unitario</td>
+			</tr>
+			
+			<% for(var item in listaresultados) { %>
+			<tr align="Center">
+				<td align="Left"><%= listaresultados[item][0] %> </td>
+				<td><%= listaresultados[item][1] %> </td>
+				<td><%= listaresultados[item][2] %> </td>
+				<td><%= listaresultados[item][3] %> </td>
+				<td><%= listaresultados[item][4] %> </td>
+			</tr>
+			<% } %>
+		</table>
+		<p id="ExecutarCmd_Id">
+			Para executar procedimento click no botao
+			<button id="ExecutarCmd">Executar!</button>
+		</p>
+		<br>
+		<h3>Dados extradidos das Faturas</h3>
+		<br>
+		<table align="Center" >
+			<tr align="Center">
+				<td>Data </td>
+				<td>Artigo </td>
+				<td>Iva </td>
+				<td>Qtd.</td>
+				<td>Custo unitario </td>
+				<td>Custo Total</td>
+				<td>Desconto</td>
+				<td>Custo unitário Real</td>
+				<td>Custo total Real</td>
+			</tr>
+			
+			<% for(var item in listaresultadosPDF) { %>
+			<tr align="Center">
+				<td><%= listaresultadosPDF[item][0] %> </td>
+				<td align="Left"><%= listaresultadosPDF[item][1] %> </td>
+				<td><%= listaresultadosPDF[item][2] %> </td>
+				<td><%= listaresultadosPDF[item][3] %> </td>
+				<td><%= listaresultadosPDF[item][4] %> </td>
+				<td><%= listaresultadosPDF[item][5] %> </td>
+				<td><%= listaresultadosPDF[item][6] %> </td>
+				<td><%= listaresultadosPDF[item][7] %> </td>
+				<td><%= listaresultadosPDF[item][8] %> </td>
+			</tr>
+			<% } %>
+		</table>
+	</body>
+	<script src="client.js"></script>
+</html>

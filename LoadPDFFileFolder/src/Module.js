@@ -16,8 +16,10 @@ AnalisedataSQL =  Concretiza um estudo dos artigos adquiridos em datas distintas
 
 Desenvolvido por Nuno Lopes 29-09-2020
 */
-
-runSequentially(); 
+const fs = require("fs"); 
+const src = '../Input';
+var listarresultados=[];
+var listarresultadosPDFLoad=[];
 
 async function runSequentially() {
 
@@ -25,23 +27,20 @@ async function runSequentially() {
 	console.log('Acabou processamento dos PDFs');
 
 	await writedatatxt(dadosresposta,textoresposta);
-	console.log('Acabou exportação para ficheiros TXT');
+	console.log('Acabou exportacao para ficheiros TXT');
 
 	var sqlrequest=await ConectSQL();
 
 	await writedataSQL(dadosresposta,sqlrequest);
 	console.log('Acabou exportacao para BD SQL');
 
-	var resultadoresposta=await AnalisedataSQL(sqlrequest);
-	console.log('Acabou Analise para BD SQL');
-	console.log(resultadoresposta);
+	return dadosresposta;
 }
 
 function processpdffiles () {
 	return new Promise(function(resolve, reject) {
 		const PDFParser = require('pdf2json');
-		const fs = require('fs');
-		const src = '../Input';
+
 		let index = 1;
 		var DataLoad = "";
 		var artigos = [];
@@ -134,7 +133,6 @@ function processpdffiles () {
 
 function writedatatxt (artigos,DataLoad) {
 	return new Promise(function(resolve, reject) {
-		const fs = require('fs');
 		console.log('Exportar para ficheiros TXT');
 		//escrever dois ficheiros: um com a data de interesse para análise, outra com o texto completo.
 		fs.writeFileSync('../Output/DataLoadInteresst.txt', artigos.join('\n'), 'binary');
@@ -207,3 +205,52 @@ function AnalisedataSQL (sqlrequest) {
 		});
 	});
 }
+
+async function AnalisedataSQL2() {
+
+	var sqlrequest=await ConectSQL();
+
+	var resultadoresposta=await AnalisedataSQL(sqlrequest);
+	console.log('Acabou Analise para BD SQL');
+
+	return resultadoresposta;
+	
+}
+
+//// Resultados PDF Load SQL Array
+function resultadosPDFLoad(){	
+
+	var dadosPDF=runSequentially();
+
+		dadosPDF.then((result)=>{
+		for (let i = 0 ;i < result.length;++i){
+  			listarresultadosPDFLoad.push([result[i][0],result[i][1],result[i][2],result[i][3],result[i][4],result[i][5],result[i][6],result[i][7],result[i][8]]);
+		}
+	});
+
+	return listarresultadosPDFLoad;
+}
+// Documentos na pasta
+function filespdffolder(){	
+	return ficheiros_src = fs.readdirSync(src); 
+}
+
+// Análise SQL Array
+function resultadosSQL(){
+
+	var resultadoresposta=AnalisedataSQL2();
+
+	resultadoresposta.then((result)=>{
+		for (let i = 0 ;i < result.length;++i){
+  			listarresultados.push([result[i].Product,result[i].Ncompras,result[i].media,result[i].maximo,result[i].minimo]);
+		}
+	});
+
+	return listarresultados;
+}
+
+module.exports = {
+  resultadosPDFLoad,
+  filespdffolder,
+  resultadosSQL
+};
