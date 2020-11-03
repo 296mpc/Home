@@ -1,0 +1,8 @@
+setTimeout(function () {
+   for (i = 0; i < 10; i++) {
+      var Var_cmd= document.getElementById("numero");
+        var valor=valor();
+     alert(valor);
+ Var_cmd.innerHTML=valor;
+      }
+    }, 100);

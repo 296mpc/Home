@@ -1,0 +1,73 @@
+function Showimage (imagemShow){
+    
+    var Newimage = new SimpleImage(imagemShow.getWidth(),imagemShow.getHeight());
+    
+    for (var pixel of Newimage.values()){
+        var xcoord = pixel.getX();
+        var ycoord = pixel.getY();
+        
+        var imgvalue=imagemShow.getPixel(xcoord,ycoord);
+        
+        new NewRed = Showformula(imgvalue.getRed());
+        new NewGreen = Showformula(imgvalue.getGreen());
+        new NewBlue = Showformula(imgvalue.getBlue());
+        
+        imgvalue.setRed(NewRed);
+        imgvalue.setGreen(NewGreen);
+        imgvalue.setBlue(NewBlue);
+        
+        Newimage.setPixel(xcoord,ycoord,imgvalue);
+    }
+    
+    return Newimage;
+}
+
+function Hideimage (imagemHide){
+    
+    var Newimage = new SimpleImage(imagemHide.getWidth(),imagemHide.getHeight());
+    
+    for (var pixel of Newimage.values()){
+        var xcoord = pixel.getX();
+        var ycoord = pixel.getY();
+        
+        var imgvalue=imagemHide.getPixel(xcoord,ycoord);
+        
+        new NewRed = Hideformula(imgvalue.getRed());
+        new NewGreen = Hideformula(imgvalue.getGreen());
+        new NewBlue = Hideformula(imgvalue.getBlue());
+        
+        imgvalue.setRed(NewRed);
+        imgvalue.setGreen(NewGreen);
+        imgvalue.setBlue(NewBlue);
+        
+        Newimage.setPixel(xcoord,ycoord,imgvalue);
+    }
+    
+    return Newimage;
+}
+
+
+function Combineimage (imagemShow,imagemHide){
+    
+    var Newimage = new SimpleImage(imagemShow.getWidth(),imagemShow.getHeight());
+    
+    for (var pixel of Newimage.values()){
+        var xcoord = pixel.getX();
+        var ycoord = pixel.getY();
+        
+        var imgvalueShow=imagemShow.getPixel(xcoord,ycoord);
+        var imgvalueHide=imagemHide.getPixel(xcoord,ycoord);
+        
+        new NewRed = imgvalueShow.getRed()+imgvalueHide.getRed();
+        new NewGreen = imgvalueShow.getGreen()+imgvalueHide.getGreen();
+        new NewBlue = imgvalueShow.getBlue()+imgvalueHide.getBlue(); 
+        
+        pixel.setRed(NewRed);
+        pixel.setGreen(NewGreen);
+        pixel.setBlue(NewBlue);
+        
+        Newimage.setPixel(xcoord,ycoord,pixel);
+    }
+    
+    return Newimage;
+}
