@@ -1,17 +1,17 @@
 /*
-Sript para concretizar a leitura das faturas (PDF's) do Pingo Doce e extrair informação para posteriormente ser analisada
+Sript para concretizar a leitura das faturas (PDF's) do Pingo Doce e extrair informaï¿½ï¿½o para posteriormente ser analisada
 
-Desejnvolvidas as seguintes funções:
+Desejnvolvidas as seguintes funï¿½ï¿½es:
 
-processpdffiles = faz a leitura dos documentos pdf's existentes na pasta, retira toda a informação necessária e construi matrix de dados
+processpdffiles = faz a leitura dos documentos pdf's existentes na pasta, retira toda a informaï¿½ï¿½o necessï¿½ria e construi matrix de dados
 
-writedatatxt = faz a excrita da matrix extraida num ficheiro txt e de toda a informação constante nos documentos pdfs noutro ficheiro txt
+writedatatxt = faz a excrita da matrix extraida num ficheiro txt e de toda a informaï¿½ï¿½o constante nos documentos pdfs noutro ficheiro txt
 
-ConectSQL= faz a conecção com a base de dados com as credenciais de autenticação
+ConectSQL= faz a conecï¿½ï¿½o com a base de dados com as credenciais de autenticaï¿½ï¿½o
 
 writedataSQL = faz a excrita da matrix extraida na tabela da BD
 
-AnalisedataSQL =  Concretiza um estudo dos artigos adquiridos em datas distintas e tenham flutuação de preços, devolvendo o preço médio unitário, máximo e mínimo.
+AnalisedataSQL =  Concretiza um estudo dos artigos adquiridos em datas distintas e tenham flutuaï¿½ï¿½o de preï¿½os, devolvendo o preï¿½o mï¿½dio unitï¿½rio, mï¿½ximo e mï¿½nimo.
 
 
 Desenvolvido por Nuno Lopes 29-09-2020
@@ -44,7 +44,7 @@ function processpdffiles () {
 		let index = 1;
 		var DataLoad = "";
 		var artigos = [];
-		fs.readdir(src, (err, files) => {	 //ler diretório Input PDF's
+		fs.readdir(src, (err, files) => {	 //ler diretï¿½rio Input PDF's
 		console.log('Iniciou processamento dos PDFs');
 			files.forEach(item => {
 				let name="";
@@ -61,11 +61,11 @@ function processpdffiles () {
 				pdfParser.loadPDF(`${src}/${item}`); //ler ficheiro PDF
 				pdfParser.on('pdfParser_dataError', errData => console.error(errData.parserError)); pdfParser.on('pdfParser_dataReady', () => {
 					console.log('Leitura do ' + index.toString() + ' ficheiro');
-					let data = pdfParser.getRawTextContent(); //Extrair conteúdo
-					let arrayOfLines = data.match(/[^\r\n]+/g); //Separar o conteúdo numa lista por linhas
+					let data = pdfParser.getRawTextContent(); //Extrair conteï¿½do
+					let arrayOfLines = data.match(/[^\r\n]+/g); //Separar o conteï¿½do numa lista por linhas
 					let result = data;
 					DataLoad = DataLoad + result;
-					//Extrair informação que pretendemos tratar Produto, valor, quantidade, preço unitário, etc...
+					//Extrair informaï¿½ï¿½o que pretendemos tratar Produto, valor, quantidade, preï¿½o unitï¿½rio, etc...
 				for (let i = 0 ;i < arrayOfLines.length;++i){
 						if ((['E ', 'C ', 'D '].indexOf(arrayOfLines[i].toString().trim().substring(0,2)) >= 0) && (arrayOfLines[i].toString().trim().substring(6).substring(0,1)!=" ")) {
 							name= arrayOfLines[i].toString().substring(6,arrayOfLines[i].toString().length-9).trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/['\/#!$%\^&\*;:{}=\-_`~()]/g," "); //Devido ao caracter especiais, retirar todos
@@ -73,10 +73,10 @@ function processpdffiles () {
 							qtd=1;
 							valunit=0;
 							desconto=0;
-							if(parseFloat(arrayOfLines[i].toString().substring(arrayOfLines[i].toString().length-9).replace(',','.').trim())>0){ // tudo na mesma linha (unitário)
+							if(parseFloat(arrayOfLines[i].toString().substring(arrayOfLines[i].toString().length-9).replace(',','.').trim())>0){ // tudo na mesma linha (unitï¿½rio)
 								Value= arrayOfLines[i].toString().substring(arrayOfLines[i].toString().length-9).trim().replace(',','.');
 								valunit=Value;
-								descr_desconto=arrayOfLines[i+1].toString().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); //Devido ao caracter "ç" normalizar expressão primeiro
+								descr_desconto=arrayOfLines[i+1].toString().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); //Devido ao caracter "ï¿½" normalizar expressï¿½o primeiro
 								if(descr_desconto.lastIndexOf("Poupanca Imediata") >=0)
 								{
 									desconto=descr_desconto.substring(descr_desconto.length-9).replace('(',' ').replace(')',' ').replace(',','.').trim();
@@ -87,7 +87,7 @@ function processpdffiles () {
 								qtd=arrayOfLines[i+1].toString().substring(arrayOfLines[i+1].toString().lastIndexOf("X")-12,arrayOfLines[i+1].toString().lastIndexOf("X")-1).replace(',','.').trim();
 								valunit=arrayOfLines[i+1].toString().substring(arrayOfLines[i+1].toString().lastIndexOf("X")+1,arrayOfLines[i+1].toString().lastIndexOf("X")+10).replace(',','.').trim();
 								Value=arrayOfLines[i+1].toString().trim().substring(arrayOfLines[i+1].toString().trim().lastIndexOf(",")-9).trim().replace(',','.');
-								descr_desconto=arrayOfLines[i+2].toString().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); //Devido ao caracter "ç" normalizar expressão primeiro e retirar todos os caracteres especiais
+								descr_desconto=arrayOfLines[i+2].toString().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); //Devido ao caracter "ï¿½" normalizar expressï¿½o primeiro e retirar todos os caracteres especiais
 								if(descr_desconto.lastIndexOf("Poupanca Imediata") >=0)
 								{
 									desconto=descr_desconto.substring(descr_desconto.length-9).replace('(',' ').replace(')',' ').replace(',','.').trim();
@@ -96,7 +96,7 @@ function processpdffiles () {
 							valoruni_real=valunit;
 							valor_real=Value;
 
-							if (parseFloat(desconto)>0) //Cálcular valor real artigo
+							if (parseFloat(desconto)>0) //Cï¿½lcular valor real artigo
 							{
 								valoruni_real=(parseFloat(Value)-parseFloat(desconto))/parseFloat(qtd);
 								valor_real=parseFloat(Value)-parseFloat(desconto);
@@ -109,7 +109,7 @@ function processpdffiles () {
 						{
 							datacompra =arrayOfLines[i].toString().trim().substring(arrayOfLines[i].toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().lastIndexOf("Data de emissao:")+16).trim();
 						
-							for (var j in artigos) { // atualizar data da compra (uma vez que a mesma está no final do documento)
+							for (var j in artigos) { // atualizar data da compra (uma vez que a mesma estï¿½ no final do documento)
 								if (artigos[j][0] == "dd-mm-aaaa") 
 								{
 									artigos[j][0] = datacompra;
@@ -134,7 +134,7 @@ function processpdffiles () {
 function writedatatxt (artigos,DataLoad) {
 	return new Promise(function(resolve, reject) {
 		console.log('Exportar para ficheiros TXT');
-		//escrever dois ficheiros: um com a data de interesse para análise, outra com o texto completo.
+		//escrever dois ficheiros: um com a data de interesse para anï¿½lise, outra com o texto completo.
 		fs.writeFileSync('../Output/DataLoadInteresst.txt', artigos.join('\n'), 'binary');
 		fs.writeFileSync('../Output/DataLoad.txt', DataLoad, 'binary');
 		resolve(true);
@@ -196,7 +196,7 @@ function AnalisedataSQL (sqlrequest) {
 		console.log("Iniciar analise dados da Base Dados");
 
 		// query to the database and get the records
-		var sqlquery2 = "Select * from (select Product,Count(*)as Ncompras, avg(UnitCostReal) as media,max(UnitCostReal)as maximo,min(UnitCostReal)as minimo from PingoDoceInvoice Group by Product)PrecoUnitarioReal where Ncompras>1 and media<>maximo and media<>minimo and maximo<>minimo order by 1";
+		var sqlquery2 = "Select * from (select Product,Count(*)as Ncompras, avg(UnitCostReal) as media,max(UnitCostReal)as maximo,min(UnitCostReal)as minimo from PingoDoceInvoice Group by Product)PrecoUnitarioReal order by 2 desc, 1";
 
 		//Executar Query
 		sqlrequest.query(sqlquery2,function (err, resultado) {
@@ -235,7 +235,7 @@ function filespdffolder(){
 	return ficheiros_src = fs.readdirSync(src); 
 }
 
-// Análise SQL Array
+// Anï¿½lise SQL Array
 function resultadosSQL(){
 
 	var resultadoresposta=AnalisedataSQL2();
